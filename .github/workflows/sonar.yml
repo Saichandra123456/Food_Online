@@ -14,34 +14,34 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Updated to the latest version
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3  # Updated to the latest version
         with:
           python-version: 3.11  # Adjust this as per your project's Python version
 
       - name: Install virtualenv
-        run: pip install virtualenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install virtualenv
 
-      - name: Set up Virtual Environment
+      - name: Set up Virtual Environment and Install Dependencies
         run: |
           python -m venv env
           source env/bin/activate
-
-      - name: Install Dependencies from Virtual Environment
-        run: |
-          source env/bin/activate
+          pip install -r requirements.txt || true  # Ignore error if requirements.txt is missing
 
       - name: Run Tests and Generate Coverage Report
         run: |
           source env/bin/activate
+          pip install coverage  # Ensure coverage is installed
           coverage run manage.py test
           coverage xml
 
       - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@master
+        uses: sonarsource/sonarqube-scan-action@v1  # Updated to the latest stable version
         env:
           SONAR_HOST_URL: http://localhost:9000  # Adjust this if using a hosted version
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: Food_Online   # Match this with sonar.projectKey in sonar-project.properties
+          SONAR_PROJECT_KEY: Food_Online  # Match this with sonar.projectKey in sonar-project.properties
