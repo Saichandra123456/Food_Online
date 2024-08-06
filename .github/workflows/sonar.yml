@@ -1,0 +1,47 @@
+name: SonarQube Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11  # Adjust this as per your project's Python version
+
+      - name: Install virtualenv
+        run: pip install virtualenv
+
+      - name: Set up Virtual Environment
+        run: |
+          python -m venv env
+          source env/bin/activate
+
+      - name: Install Dependencies from Virtual Environment
+        run: |
+          source env/bin/activate
+
+      - name: Run Tests and Generate Coverage Report
+        run: |
+          source env/bin/activate
+          coverage run manage.py test
+          coverage xml
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_HOST_URL: http://localhost:9000  # Adjust this if using a hosted version
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: Food_Online   # Match this with sonar.projectKey in sonar-project.properties
